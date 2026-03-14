@@ -12,10 +12,14 @@ export function TodoList() {
 
   useEffect(() => {
     fetch('/api/todos')
-      .then((r) => r.json() as Promise<{ data?: Todo[] }>)
+      .then(async (r) => {
+        if (!r.ok) throw new Error('Failed to fetch')
+        return r.json() as Promise<{ data?: Todo[] }>
+      })
       .then((json) => {
         if (json.data) setTodos(json.data)
       })
+      .catch((err) => console.error('[TodoList] fetch', err))
       .finally(() => setLoading(false))
   }, [])
 
@@ -25,16 +29,29 @@ export function TodoList() {
 
   const handleToggle = async (id: string, completed: boolean) => {
     setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, completed } : t)))
-    await fetch(`/api/todos/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ completed }),
-    })
+    try {
+      const res = await fetch(`/api/todos/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed }),
+      })
+      if (!res.ok) throw new Error('Failed to update')
+    } catch (err) {
+      console.error('[TodoList] toggle', err)
+      setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !completed } : t)))
+    }
   }
 
   const handleDelete = async (id: string) => {
+    const snapshot = todos
     setTodos((prev) => prev.filter((t) => t.id !== id))
-    await fetch(`/api/todos/${id}`, { method: 'DELETE' })
+    try {
+      const res = await fetch(`/api/todos/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete')
+    } catch (err) {
+      console.error('[TodoList] delete', err)
+      setTodos(snapshot)
+    }
   }
 
   const remaining = todos.filter((t) => !t.completed).length

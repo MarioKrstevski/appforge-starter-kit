@@ -3,6 +3,8 @@ import { db } from '@/db'
 import { todos } from '@/db/schema'
 import { asc } from 'drizzle-orm'
 import { z } from 'zod'
+import { auth } from '@/lib/auth'
+import { headers } from 'next/headers'
 import type { ApiResponse } from '@/types'
 import type { Todo } from '@/db/schema'
 
@@ -11,6 +13,9 @@ const createSchema = z.object({
 })
 
 export async function GET() {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return NextResponse.json<ApiResponse>({ error: 'Unauthorized' }, { status: 401 })
+
   try {
     const results = await db.select().from(todos).orderBy(asc(todos.createdAt))
     return NextResponse.json<ApiResponse<Todo[]>>({ data: results })
@@ -21,6 +26,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return NextResponse.json<ApiResponse>({ error: 'Unauthorized' }, { status: 401 })
+
   try {
     const body = await req.json() as unknown
     const parsed = createSchema.safeParse(body)

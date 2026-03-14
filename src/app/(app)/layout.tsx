@@ -4,7 +4,12 @@ import { auth } from '@/lib/auth'
 import { Sidebar } from '@/components/layout/sidebar'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth.api.getSession({ headers: await headers() })
+  let session
+  try {
+    session = await auth.api.getSession({ headers: await headers() })
+  } catch {
+    redirect('/sign-in')
+  }
 
   if (!session) {
     redirect('/sign-in')
