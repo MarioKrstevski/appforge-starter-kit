@@ -5,6 +5,11 @@ import '@/styles/globals.css'
 import { siteConfig } from '@/config/site'
 import { cn } from '@/lib/utils'
 import { Navbar } from '@/components/layout/navbar'
+import { Toaster } from '@/components/ui/sonner'
+import { isDemoMode } from '@/config/dev'
+import { DemoBanner } from '@/components/dev/demo-banner'
+import { DevToasts } from '@/components/dev/dev-toasts'
+import { DevPanel } from '@/components/dev/dev-panel'
 
 export const metadata: Metadata = {
   title: {
@@ -44,7 +49,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         )}
       >
         <Navbar />
+        {isDemoMode && <DemoBanner />}
         {children}
+        <Toaster richColors closeButton />
+        {isDemoMode && <DevToasts />}
+        {isDemoMode && <DevPanel />}
       </body>
     </html>
   )
