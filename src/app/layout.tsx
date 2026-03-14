@@ -4,9 +4,7 @@ import { GeistMono } from 'geist/font/mono'
 import '@/styles/globals.css'
 import { siteConfig } from '@/config/site'
 import { cn } from '@/lib/utils'
-import { Geist } from "next/font/google";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+import { Navbar } from '@/components/layout/navbar'
 
 export const metadata: Metadata = {
   title: {
@@ -37,7 +35,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
+    <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
@@ -45,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           GeistMono.variable
         )}
       >
+        <Navbar />
         {children}
       </body>
     </html>
