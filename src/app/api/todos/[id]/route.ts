@@ -3,8 +3,6 @@ import { db } from '@/db'
 import { todos } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { auth } from '@/lib/auth'
-import { headers } from 'next/headers'
 import type { ApiResponse } from '@/types'
 import type { Todo } from '@/db/schema'
 
@@ -17,9 +15,6 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) return NextResponse.json<ApiResponse>({ error: 'Unauthorized' }, { status: 401 })
-
   try {
     const { id } = await params
     const body = await req.json() as unknown
@@ -53,9 +48,6 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (!session) return NextResponse.json<ApiResponse>({ error: 'Unauthorized' }, { status: 401 })
-
   try {
     const { id } = await params
     const [deleted] = await db.delete(todos).where(eq(todos.id, id)).returning()
