@@ -1,162 +1,104 @@
 # AppForge Scaffold
 
-Your personal Next.js starter. Clone your GitHub repo, drop these files in, and run one command.
+Batteries-included Next.js 15 starter kit for internal and client projects. Pre-built integration modules for auth, payments, email, and storage — activate what you need, delete the rest.
 
----
+## Stack
 
-## Quickstart
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 15 (App Router, Turbopack) |
+| Language | TypeScript 5 strict |
+| Styling | Tailwind CSS v4 + shadcn/ui |
+| Database | Drizzle ORM + Postgres 17 (Docker) |
+| Auth | better-auth |
+| Forms | React Hook Form + Zod |
+| State | Zustand |
+
+## Getting Started
 
 ```bash
-# 1. Clone your new GitHub repo
-git clone https://github.com/you/your-new-project
-cd your-new-project
+# 1. Start the database
+docker compose up -d
 
-# 2. Unzip the scaffold into the folder (contents, not the folder itself)
-# Then install all dependencies:
-npm install
-
-# 3. Copy environment variables
+# 2. Copy env vars
 cp .env.example .env.local
 
-# 4. Start the dev server
-npm run dev
+# 3. Install dependencies
+pnpm install
+
+# 4. Push schema to DB
+pnpm db:push
+
+# 5. Seed demo user (optional)
+pnpm db:seed
+
+# 6. Start dev server
+pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000). Demo login: `demo@appforge.com` / `demo1234`
 
----
+## Integration Modules
 
-## Setup Checklist
+All modules live in `integrations/`. The discovery agent activates chosen modules and deletes the rest.
 
-After unzipping, go through `.env.example` and fill in what you need for your chosen stack.
-
-### If you chose Prisma
-```bash
-npm run db:generate
-npm run db:push
-```
-
-### If you chose Drizzle
-```bash
-npm run db:generate
-npm run db:push
-```
-
-### If you chose shadcn/ui components
-```bash
-npx shadcn@latest init
-# Then add components as needed:
-npx shadcn@latest add button card input label
-```
-
----
+| Category | Option A | Option B |
+|---|---|---|
+| Auth | `better-auth` | `supabase-auth` |
+| Payments | `stripe` | `paddle` |
+| Email | `resend` | `supabase-email` |
+| Storage | `uploadthing` | `s3` |
 
 ## Project Structure
 
 ```
 src/
-  app/
-    (marketing)/        # Public pages: landing, pricing, about
-    (app)/              # Authenticated app pages
-    api/                # API routes
-      ai/               # AI endpoints (if AI SDK selected)
-      auth/             # Auth endpoints
-  components/
-    ui/                 # shadcn/ui base components
-    blocks/             # Multi-component section blocks (Hero, Reviews, etc.)
-    layout/             # Header, Footer, Sidebar, Nav
-  lib/
-    agents/             # Claude Code agent definitions
-    prompts/            # AI prompt templates
-    utils.ts            # cn(), formatDate(), formatCurrency(), slugify()
-  hooks/                # Custom React hooks
-  types/                # Global TypeScript types
-  config/
-    site.ts             # App name, URL, metadata
-  styles/
-    globals.css         # Tailwind + CSS variables (light/dark)
+  app/(marketing)/    Public pages (landing, pricing, about)
+  app/(app)/          Authenticated pages — one folder per feature
+  app/api/            API routes — folder name matches feature
+  components/ui/      shadcn/ui base components
+  components/blocks/  Full section blocks (hero, pricing, reviews…)
+  components/layout/  Header, Footer, Sidebar
+  db/schema/          Drizzle table definitions — one file per domain
+  lib/                Utilities and third-party clients
+  hooks/              Custom React hooks (use- prefix)
+  types/              Shared TypeScript types
+  config/             Site config and feature flags
+integrations/         Pre-built modules (activated during setup)
+drizzle/migrations/   Generated SQL migrations (committed to git)
 ```
 
----
-
-## Available Scripts
-
-| Command | What it does |
-|---|---|
-| `npm run dev` | Start dev server with Turbopack |
-| `npm run build` | Production build |
-| `npm run lint` | ESLint check |
-| `npm run format` | Prettier format all files |
-| `npm run db:push` | Push DB schema (Prisma or Drizzle) |
-| `npm run db:studio` | Open DB GUI |
-| `npm run db:generate` | Generate DB client |
-
----
-
-## Using Claude Code Agents
-
-This scaffold includes pre-configured agents in `.claude/agents/`. Start Claude Code from your project root:
+## Scripts
 
 ```bash
-claude
+pnpm dev            # Dev server
+pnpm build          # Production build
+pnpm lint           # ESLint
+pnpm format         # Prettier
+
+pnpm db:push        # Push schema to DB (dev only)
+pnpm db:generate    # Generate migration files
+pnpm db:migrate     # Run migrations
+pnpm db:studio      # Open Drizzle Studio
+pnpm db:seed        # Create demo user
 ```
 
-### Available Agents
+## Claude Code Agents
 
-**`discovery`** — Run this first on any new project
-> Interviews you about your MVP, defines features, creates your CLAUDE.md, and outputs a prioritized feature roadmap.
+Run `claude` in the project root, then talk to these agents:
 
-**`feature`** — Use for each feature on your roadmap  
-> Takes a single feature description and scaffolds the full implementation: route, component, API, types, and hooks.
+| Say… | Agent | What it does |
+|---|---|---|
+| "Use the discovery agent" | `discovery` | Interviews you, sets up CLAUDE.md and feature roadmap |
+| "Use the feature agent to build: X" | `feature` | Scaffolds route, page, components, API, types, hooks |
+| "Use the component agent to create a X" | `component` | Builds a typed UI component |
+| "Use the api-route agent to create the X endpoint" | `api-route` | Creates a typed, validated API route |
 
-**`api-route`** — Scaffold a new API endpoint  
-> Creates a typed Next.js API route with error handling, validation, and response helpers.
+## Demo Mode
 
-**`component`** — Create a new UI component  
-> Builds a typed, accessible component following your project conventions.
+Set `DEMO_MODE=true` in `.env.local` to enable:
 
-### How to use an agent
-
-```bash
-# In Claude Code, invoke an agent:
-/agent discovery
-
-# Or reference it in your prompt:
-"Use the feature agent to build the user profile page"
-```
-
----
-
-## Component Blocks
-
-Pre-built multi-component sections live in `src/components/blocks/`.
-Each block category has multiple design variants (v1, v2, v3...).
-
-To add a block to a page:
-```tsx
-import { ReviewsV2 } from '@/components/blocks/reviews'
-
-export default function LandingPage() {
-  return (
-    <main>
-      <ReviewsV2 />
-    </main>
-  )
-}
-```
-
-Available block categories (add more via the `component` agent):
-- `hero/` — Hero sections
-- `reviews/` — Testimonial/review sections  
-- `pricing/` — Pricing tables
-- `cta/` — Call-to-action sections
-- `features/` — Feature grids/lists
-- `faq/` — FAQ sections
-
----
-
-## Next Steps
-
-1. Run `claude` and invoke the `discovery` agent
-2. It will interview you and generate your `CLAUDE.md`
-3. Work through your feature roadmap using the `feature` agent
+- Auto-created demo user on seed
+- Magic links and verification emails show as toasts (no real email needed)
+- "Sign in as demo" button on the sign-in page
+- Dev panel in the bottom-right corner
