@@ -17,22 +17,25 @@ Batteries-included Next.js 15 starter kit for internal and client projects. Pre-
 ## Getting Started
 
 ```bash
-# 1. Start the database
-docker compose up -d
+# 1. Reset git history
+rm -rf .git && git init && git add -A && git commit -m "initial commit"
 
-# 2. Copy env vars
+# 2. Copy env vars (set ports, add BETTER_AUTH_SECRET)
 cp .env.example .env.local
 
-# 3. Install dependencies
+# 3. Start the database
+docker compose up -d
+
+# 4. Install dependencies
 pnpm install
 
-# 4. Push schema to DB
+# 5. Push schema to DB
 pnpm db:push
 
-# 5. Seed demo user (optional)
+# 6. Seed demo user (optional)
 pnpm db:seed
 
-# 6. Start dev server
+# 7. Start dev server
 pnpm dev
 ```
 
